@@ -7,7 +7,7 @@ class Question(Base):
     __tablename__ = "questions"
 
     id = Column(Integer, primary_key=True, index=True)
-    text = Column(Text, nullable=False)
+    question_text = Column(Text, nullable=False)
     # связь с ответами
     answers = relationship(
         "Answer",

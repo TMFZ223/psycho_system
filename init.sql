@@ -16,7 +16,8 @@ create table if not exists answers (
     id serial primary key,
     question_id int not null references questions(id) on delete cascade,
     variant text not null,
-    score int default 0
+    score int default 0,
+    position int not null
 );
 
 CREATE TABLE if not exists user_answers (

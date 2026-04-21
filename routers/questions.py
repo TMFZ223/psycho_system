@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -30,7 +30,7 @@ async def get_questions(
     for q in questions:
         data.append({
             "id": q.id,
-            "text": q.text,
+            "text": q.question_text,
             "answers": [
                 {
                     "id": a.id,
@@ -53,7 +53,7 @@ async def create_question(
     db: AsyncSession = Depends(get_db)
 ):
     # создаём вопрос
-    question = Question(text=data.question_text)
+    question = Question(question_text=data.question_text)
 
     db.add(question)
     await db.flush()  # получаем question.id
@@ -93,5 +93,3 @@ async def delete_question(
 
     await db.delete(question)
     await db.commit()
-
-    return Response(status_code=204)
