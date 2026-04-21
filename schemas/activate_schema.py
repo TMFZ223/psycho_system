@@ -1,4 +1,4 @@
 from pydantic import BaseModel
 
 class ActivateSchema(BaseModel):
-    activationCode: str
+    activation_code: str

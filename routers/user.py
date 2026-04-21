@@ -22,18 +22,18 @@ async def get_db():
 async def register(data: RegisterSchema, db: AsyncSession = Depends(get_db)):
 
     if not data.email:
-        return {"success": False, "status": 400, "data": {"errorMessage": "email should not be empty"}}
+        return {"success": False, "status": 400, "data": {"error_message": "email should not be empty"}}
 
     err = validate_email(data.email)
     if err:
-        return {"success": False, "status": 400, "data": {"errorMessage": err}}
+        return {"success": False, "status": 400, "data": {"error_message": err}}
 
     err = validate_password(data.password)
     if err:
-        return {"success": False, "status": 400, "data": {"errorMessage": err}}
+        return {"success": False, "status": 400, "data": {"error_message": err}}
 
-    if data.password != data.verifyPassword:
-        return {"success": False, "status": 400, "data": {"errorMessage": "input passwords don't match"}}
+    if data.password != data.verify_password:
+        return {"success": False, "status": 400, "data": {"error_message": "input passwords don't match"}}
 
     result = await db.execute(
         select(User).where(User.email == data.email)
@@ -41,7 +41,7 @@ async def register(data: RegisterSchema, db: AsyncSession = Depends(get_db)):
     existing = result.scalar_one_or_none()
 
     if existing:
-        return {"success": False, "status": 400, "data": {"errorMessage": "email already in use"}}
+        return {"success": False, "status": 400, "data": {"error_message": "email already in use"}}
 
     code = generate_code()
     activation_storage[code] = data
@@ -58,10 +58,10 @@ async def register(data: RegisterSchema, db: AsyncSession = Depends(get_db)):
 
 @router.post("/activate")
 async def activate(data: ActivateSchema, db: AsyncSession = Depends(get_db)):
-    stored = activation_storage.get(data.activationCode)
+    stored = activation_storage.get(data.activation_code)
 
     if not stored:
-        return {"success": False, "status": 400, "data": {"errorMessage": "invalid activation code"}}
+        return {"success": False, "status": 400, "data": {"error_message": "invalid activation code"}}
 
     try:
         user = User(
@@ -74,7 +74,7 @@ async def activate(data: ActivateSchema, db: AsyncSession = Depends(get_db)):
         await db.commit()
         await db.refresh(user)
 
-        del activation_storage[data.activationCode]
+        del activation_storage[data.activation_code]
 
         return {
             "success": True, "status": 200,
@@ -86,20 +86,20 @@ async def activate(data: ActivateSchema, db: AsyncSession = Depends(get_db)):
         print("ACTIVATE ERROR:", str(e))
         return {
             "success": False, "status": 500,
-            "data": {"errorMessage": "failed to create user"}
+            "data": {"error_message": "failed to create user"}
         }
 
 
 @router.post("/auth")
 async def auth(data: AuthSchema, db: AsyncSession = Depends(get_db)):
     if not data.email:
-        return {"success": False, "status": 400, "data": {"errorMessage": "email should not be empty"}}
+        return {"success": False, "status": 400, "data": {"error_message": "email should not be empty"}}
 
     err = validate_email(data.email)
     if err:
-        return {"success": False, "status": 400, "data": {"errorMessage": err}}
+        return {"success": False, "status": 400, "data": {"error_message": err}}
     if not data.password:
-        return {"success": False, "status": 400, "data": {"errorMessage": "password should not be empty"}}
+        return {"success": False, "status": 400, "data": {"error_message": "password should not be empty"}}
     try:
         result = await db.execute(
             select(User).where(User.email == data.email)
@@ -107,10 +107,10 @@ async def auth(data: AuthSchema, db: AsyncSession = Depends(get_db)):
         user = result.scalar_one_or_none()
 
         if not user or not user.password:
-            return {"success": False, "status": 400, "data": {"errorMessage": "invalid credentials"}}
+            return {"success": False, "status": 400, "data": {"error_message": "invalid credentials"}}
 
         if not verify_password(data.password, user.password):
-            return {"success": False, "status": 400, "data": {"errorMessage": "invalid credentials"}}
+            return {"success": False, "status": 400, "data": {"error_message": "invalid credentials"}}
 
         token = create_token({"sub": user.email})
 
@@ -118,7 +118,7 @@ async def auth(data: AuthSchema, db: AsyncSession = Depends(get_db)):
             "success": True, "status": 200,
             "data": {
                 "role": user.role,
-                "accessToken": token
+                "access_token": token
             }
         }
 
@@ -126,5 +126,5 @@ async def auth(data: AuthSchema, db: AsyncSession = Depends(get_db)):
         print("AUTH ERROR:", str(e))
         return {
             "success": False, "status": 500,
-            "data": {"errorMessage": "internal server error"}
+            "data": {"error_message": "internal server error"}
         }
