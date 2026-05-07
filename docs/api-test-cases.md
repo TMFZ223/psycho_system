@@ -749,7 +749,8 @@ http://localhost:8080
         "status": 200,
         "data": {
             "role": "admin",
-            "accessToken": "token value"
+            "access_token": "token value",
+            "refresh_token": "token value"
         }
       }
    ```
