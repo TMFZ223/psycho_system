@@ -1,14 +1,15 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from database import SessionLocal
 from db_table_models.user import User
+from db_table_models.refresh_token import RefreshToken
 from schemas.register_schema import RegisterSchema
 from schemas.activate_schema import ActivateSchema
 from schemas.auth_schema import AuthSchema
 from utils import validate_email, validate_password, generate_code, activation_storage
-from auth import hash_password, verify_password, create_token
+from auth import hash_password, verify_password, create_access_token, create_refresh_token
 
 router = APIRouter(prefix="/user", tags=["User"])
 
@@ -112,13 +113,28 @@ async def auth(data: AuthSchema, db: AsyncSession = Depends(get_db)):
         if not verify_password(data.password, user.password):
             return {"success": False, "status": 400, "data": {"error_message": "invalid credentials"}}
 
-        token = create_token({"sub": user.email})
+        access_token = create_access_token({
+            "sub": user.email
+        })
 
+        refresh_token = create_refresh_token({
+            "sub": user.email
+        })
+
+        db_refresh = RefreshToken(
+            user_id=user.id,
+            token=refresh_token
+        )
+
+        db.add(db_refresh)
+
+        await db.commit()
         return {
             "success": True, "status": 200,
             "data": {
                 "role": user.role,
-                "access_token": token
+                "access_token": access_token,
+                "refresh_token": refresh_token
             }
         }
 
@@ -127,4 +143,46 @@ async def auth(data: AuthSchema, db: AsyncSession = Depends(get_db)):
         return {
             "success": False, "status": 500,
             "data": {"error_message": "internal server error"}
+        }
+
+@router.post("/locked_out")
+async def locked_out(
+    refresh_token: str = Header(...),
+    db: AsyncSession = Depends(get_db)
+):
+    try:
+        result = await db.execute(
+            select(RefreshToken).where(
+                RefreshToken.token == refresh_token
+            )
+        )
+
+        token = result.scalar_one_or_none()
+
+        if not token:
+            return {
+                "success": False,
+                "status": 400,
+                "data": {
+                    "error_message": "invalid refresh token"
+                }
+            }
+
+        await db.delete(token)
+        await db.commit()
+
+        return {
+            "success": True,
+            "status": 200,
+            "data": {
+                "message": "logged out"
+            }
+        }
+
+    except Exception as e:
+        print("LOGOUT ERROR:", str(e))
+
+        return {
+            "success": False,
+            "status": 500
         }

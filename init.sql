@@ -29,6 +29,13 @@ CREATE TABLE if not exists user_answers (
     UNIQUE (user_id, question_id)
 );
 
+create table if not exists refresh_token (
+    id int primary key,
+    user_id int NOT NULL references users(id) on delete cascade,
+    token text not null unique,
+    created_at TIMESTAMP DEFAULT NOW()
+    );
+
 ALTER TABLE answers
 ADD CONSTRAINT answers_question_id_id_unique
 UNIQUE (id, question_id);
