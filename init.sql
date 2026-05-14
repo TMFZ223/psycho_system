@@ -1,9 +1,20 @@
 create extension if not exists pgcrypto;
+CREATE TABLE if not exists activation_codes (
+    id SERIAL PRIMARY KEY,
+    user_email VARCHAR NOT NULL,
+    code VARCHAR NOT NULL UNIQUE,
+    is_used BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL
+);
+CREATE INDEX if not exists ix_activation_codes_user_email
+ON activation_codes (user_email);
 create table if not exists users (
   id serial primary key,
    email varchar(255) not null,
    password varchar(255) not null,
-   role varchar(7) not null
+   role varchar(7) not null,
+    is_active boolean default false
   );
 create unique index if not exists ux_users_email_ci on users (email);
 
@@ -29,8 +40,8 @@ CREATE TABLE if not exists user_answers (
     UNIQUE (user_id, question_id)
 );
 
-create table if not exists refresh_token (
-    id int primary key,
+create table if not exists refresh_tokens (
+    id serial primary key,
     user_id int NOT NULL references users(id) on delete cascade,
     token text not null unique,
     created_at TIMESTAMP DEFAULT NOW()
@@ -54,5 +65,5 @@ CREATE TABLE if not exists attempts (
 ALTER TABLE user_answers
 ADD COLUMN attempt_id INT REFERENCES attempts(id);
 
-insert into users (email, password, role)
-  values ('example@domain.com', '$2b$12$mCi.qNW5aGspCdyDPfOpzerV.xcDDx551oxgL4Ug7ULFU2d4MxGrq', 'admin') on conflict (email) do nothing;
+insert into users (email, password, role, is_active)
+  values ('example@domain.com', '$2b$12$mCi.qNW5aGspCdyDPfOpzerV.xcDDx551oxgL4Ug7ULFU2d4MxGrq', 'admin', true) on conflict (email) do nothing;

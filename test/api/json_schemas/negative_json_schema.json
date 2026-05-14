@@ -1,0 +1,20 @@
+{
+  "required": ["success", "status", "data"],
+  "properties": {
+    "success": {
+      "type": "boolean"
+    },
+    "status": {
+      "type": "integer"
+    },
+    "data": {
+      "type": "object",
+      "required": ["error_message"],
+      "properties": {
+        "error_message": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
