@@ -1,0 +1,41 @@
+{
+  "required": ["status", "data"],
+  "properties": {
+    "status": {
+      "type": "boolean"
+    },
+    "data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "text", "answers"],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "text": {
+            "type": "string"
+          },
+          "answers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "variant", "position"],
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "variant": {
+                  "type": "string"
+                },
+                "position": {
+                  "type": "integer",
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
