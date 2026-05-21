@@ -1,0 +1,188 @@
+from fastapi import APIRouter, Depends, Header
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+
+from database import SessionLocal
+from db_table_models.user import User
+from db_table_models.refresh_token import RefreshToken
+from schemas.register_schema import RegisterSchema
+from schemas.activate_schema import ActivateSchema
+from schemas.auth_schema import AuthSchema
+from utils import validate_email, validate_password, generate_code, activation_storage
+from auth import hash_password, verify_password, create_access_token, create_refresh_token
+
+router = APIRouter(prefix="/user", tags=["User"])
+
+
+async def get_db():
+    async with SessionLocal() as db:
+        yield db
+
+
+@router.post("/register")
+async def register(data: RegisterSchema, db: AsyncSession = Depends(get_db)):
+
+    if not data.email:
+        return {"success": False, "status": 400, "data": {"error_message": "email should not be empty"}}
+
+    err = validate_email(data.email)
+    if err:
+        return {"success": False, "status": 400, "data": {"error_message": err}}
+
+    err = validate_password(data.password)
+    if err:
+        return {"success": False, "status": 400, "data": {"error_message": err}}
+
+    if data.password != data.verify_password:
+        return {"success": False, "status": 400, "data": {"error_message": "input passwords don't match"}}
+
+    result = await db.execute(
+        select(User).where(User.email == data.email)
+    )
+    existing = result.scalar_one_or_none()
+
+    if existing:
+        return {"success": False, "status": 400, "data": {"error_message": "email already in use"}}
+
+    code = generate_code()
+    activation_storage[code] = data
+
+    print(f"Activation code: {code}")
+
+    return {
+        "success": True, "status": 200,
+        "data": {
+            "message": "check your email and send the code to activate account"
+        }
+    }
+
+
+@router.post("/activate")
+async def activate(data: ActivateSchema, db: AsyncSession = Depends(get_db)):
+    stored = activation_storage.get(data.activation_code)
+
+    if not stored:
+        return {"success": False, "status": 400, "data": {"error_message": "invalid activation code"}}
+
+    try:
+        user = User(
+            email=stored.email,
+            password=hash_password(stored.password),
+            role="user"
+        )
+
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+
+        del activation_storage[data.activation_code]
+
+        return {
+            "success": True, "status": 200,
+            "data": {"message": "user created"}
+        }
+
+    except Exception as e:
+        await db.rollback()
+        print("ACTIVATE ERROR:", str(e))
+        return {
+            "success": False, "status": 500,
+            "data": {"error_message": "failed to create user"}
+        }
+
+
+@router.post("/auth")
+async def auth(data: AuthSchema, db: AsyncSession = Depends(get_db)):
+    if not data.email:
+        return {"success": False, "status": 400, "data": {"error_message": "email should not be empty"}}
+
+    err = validate_email(data.email)
+    if err:
+        return {"success": False, "status": 400, "data": {"error_message": err}}
+    if not data.password:
+        return {"success": False, "status": 400, "data": {"error_message": "password should not be empty"}}
+    try:
+        result = await db.execute(
+            select(User).where(User.email == data.email)
+        )
+        user = result.scalar_one_or_none()
+
+        if not user or not user.password:
+            return {"success": False, "status": 400, "data": {"error_message": "invalid credentials"}}
+
+        if not verify_password(data.password, user.password):
+            return {"success": False, "status": 400, "data": {"error_message": "invalid credentials"}}
+
+        access_token = create_access_token({
+            "sub": user.email
+        })
+
+        refresh_token = create_refresh_token({
+            "sub": user.email
+        })
+
+        db_refresh = RefreshToken(
+            user_id=user.id,
+            token=refresh_token
+        )
+
+        db.add(db_refresh)
+
+        await db.commit()
+        return {
+            "success": True, "status": 200,
+            "data": {
+                "role": user.role,
+                "access_token": access_token,
+                "refresh_token": refresh_token
+            }
+        }
+
+    except Exception as e:
+        print("AUTH ERROR:", str(e))
+        return {
+            "success": False, "status": 500,
+            "data": {"error_message": "internal server error"}
+        }
+
+@router.post("/locked_out")
+async def locked_out(
+    refresh_token: str = Header(...),
+    db: AsyncSession = Depends(get_db)
+):
+    try:
+        result = await db.execute(
+            select(RefreshToken).where(
+                RefreshToken.token == refresh_token
+            )
+        )
+
+        token = result.scalar_one_or_none()
+
+        if not token:
+            return {
+                "success": False,
+                "status": 400,
+                "data": {
+                    "error_message": "invalid refresh token"
+                }
+            }
+
+        await db.delete(token)
+        await db.commit()
+
+        return {
+            "success": True,
+            "status": 200,
+            "data": {
+                "message": "logged out"
+            }
+        }
+
+    except Exception as e:
+        print("LOGOUT ERROR:", str(e))
+
+        return {
+            "success": False,
+            "status": 500
+        }
