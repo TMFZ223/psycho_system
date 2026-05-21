@@ -59,7 +59,7 @@ class UserFactory:
 
     @staticmethod
     def register_with_cyrilic_symbols_in_password():
-        return  RegisterSchema(email="visual_user@domain.com", password="метро", verify_password="метро")
+        return  RegisterSchema(email="visual_user@domain.com", password="задание", verify_password="задание")
 
     @staticmethod
     def register_with_cyrilic_and_latinic_symbols_in_password():

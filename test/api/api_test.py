@@ -55,13 +55,14 @@ async def test_positive_register(api_client, user, db_session):
     validator_of_login.check_role(after_login_response_body, EnvReader.get_env_variable_value("user_role"))
     await delete_users_by_role(db_session)
 
-@allure.title("регистрация пользователя с ранее использовавшимся email")
+@pytest.mark.parametrize("user, expected_error_message", [(UserFactory.register_with_existing_email(), "email already in use"), (UserFactory.register_with_empty_email(), "email should not be empty"), (UserFactory.register_with_none_email(), "email should not be empty"), (UserFactory.register_with_email_without_add_symbol(), "email should be an email"), (UserFactory.register_with_email_without_dod_symbol(), "email should be an email"), (UserFactory.register_with_email_without_required_symbols(), "email should be an email"), (UserFactory.register_with_6_character_password(), "Password must be between 7 and 30 characters"), (UserFactory.register_with_31_character_password(), "Password must be between 7 and 30 characters"), (UserFactory.register_with_cyrilic_symbols_in_password(), "invalid format of password"), (UserFactory.register_with_cyrilic_and_latinic_symbols_in_password(), "invalid format of password"), (UserFactory.register_with_special_and_space_symbols_in_password(), "invalid format of password"), (UserFactory.register_with_empty_password(), "password should not be empty"), (UserFactory.register_with_none_password(), "password should not be empty"), (UserFactory.register_with_empty_verify_password(), "input passwords don't match"), (UserFactory.register_with_none_verify_password(), "input passwords don't match"), (UserFactory.register_with_differents_password_verify_password(), "input passwords don't match")])
+@allure.title("Негативный тест регистрации пользователя")
 @allure.severity(allure.severity_level.CRITICAL)
-async def test_negative_register(api_client):
+async def test_negative_register(api_client, user, expected_error_message):
     register_client = RegisterClient(api_client)
     validator_negative = NegativeRequestValidator()
-    after_register_response = await register_client.register(UserFactory.register_with_existing_email())
+    after_register_response = await register_client.register(user)
     check_response_status_code(after_register_response, 200)
     after_register_response_body = after_register_response.json()
     validator_negative.validate_negative_request_schema(after_register_response_body)
-    validator_negative.chek_error_message_key(after_register_response_body, "email already in use")
+    validator_negative.chek_error_message_key(after_register_response_body, expected_error_message)

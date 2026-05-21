@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
 class RegisterSchema(BaseModel):
-    email: str
-    password: str
-    verify_password: str
+    email: str | None = None
+    password: str | None = None
+    verify_password: str | None = None
