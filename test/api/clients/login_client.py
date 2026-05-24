@@ -1,7 +1,7 @@
 import allure
 
 from clients.base_client import BaseClient
-from schemas.auth_schema import AuthSchema
+from back.schemas.auth_schema import AuthSchema
 
 
 class LoginClient(BaseClient):

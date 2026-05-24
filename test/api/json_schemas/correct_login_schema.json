@@ -1,0 +1,26 @@
+{
+  "required": ["success", "status", "data"],
+  "properties": {
+    "success": {
+      "type": "boolean"
+    },
+    "status": {
+      "type": "integer"
+    },
+    "data": {
+      "type": "object",
+      "required": ["role", "access_token", "refresh_token"],
+      "properties": {
+        "role": {
+          "type": "string"
+        },
+        "access_token": {
+          "type": "string"
+        },
+        "refresh_token": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

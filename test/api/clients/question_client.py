@@ -1,7 +1,7 @@
 import allure
 
 from clients.base_client import BaseClient
-from schemas.question_create_schema import QuestionCreateSchema
+from back.schemas.question_create_schema import QuestionCreateSchema
 
 
 class QuestionClient(BaseClient):

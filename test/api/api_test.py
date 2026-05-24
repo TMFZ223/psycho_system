@@ -5,8 +5,8 @@ from clients.Register_client import RegisterClient
 from clients.activate_user_client import ActivateUserClient
 from factories.user_factory import UserFactory
 from clients.login_client import LoginClient
-from schemas.activate_schema import ActivateSchema
-from schemas.auth_schema import AuthSchema
+from back.schemas.activate_schema import ActivateSchema
+from back.schemas.auth_schema import AuthSchema
 from validators.correct_login_validator import CorrectLoginValidator
 from validators.negative_request_validator import NegativeRequestValidator
 from validators.positive_request_validator import PositiveRequestValidator

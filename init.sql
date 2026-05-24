@@ -31,13 +31,35 @@ create table if not exists answers (
     position int not null
 );
 
-CREATE TABLE if not exists user_answers (
+ALTER TABLE answers
+ADD CONSTRAINT answers_question_id_id_unique
+UNIQUE (id, question_id);
+
+CREATE TABLE attempts (
     id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL references users(id) on delete cascade,
+    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    started_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE user_answers (
+    id SERIAL PRIMARY KEY,
+
+    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+
     question_id INT NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
-    answer_id INT NOT NULL REFERENCES answers(id) ON DELETE CASCADE,
+
+    answer_id INT NOT NULL,
+
+    attempt_id INT NOT NULL REFERENCES attempts(id) ON DELETE CASCADE,
+
     created_at TIMESTAMP DEFAULT NOW(),
-    UNIQUE (user_id, question_id)
+
+    CONSTRAINT uix_attempt_question
+        UNIQUE (attempt_id, question_id),
+
+    CONSTRAINT fk_answer_question
+        FOREIGN KEY (answer_id, question_id)
+        REFERENCES answers(id, question_id)
 );
 
 create table if not exists refresh_tokens (
@@ -46,24 +68,6 @@ create table if not exists refresh_tokens (
     token text not null unique,
     created_at TIMESTAMP DEFAULT NOW()
     );
-
-ALTER TABLE answers
-ADD CONSTRAINT answers_question_id_id_unique
-UNIQUE (id, question_id);
-
-ALTER TABLE user_answers
-ADD CONSTRAINT fk_answer_question
-FOREIGN KEY (answer_id, question_id)
-REFERENCES answers(id, question_id);
-
-CREATE TABLE if not exists attempts (
-    id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL references users(id) on delete cascade,
-    started_at TIMESTAMP DEFAULT NOW()
-);
-
-ALTER TABLE user_answers
-ADD COLUMN attempt_id INT REFERENCES attempts(id);
 
 insert into users (email, password, role, is_active)
   values ('example@domain.com', '$2b$12$mCi.qNW5aGspCdyDPfOpzerV.xcDDx551oxgL4Ug7ULFU2d4MxGrq', 'admin', true) on conflict (email) do nothing;

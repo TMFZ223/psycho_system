@@ -1,6 +1,5 @@
-from schemas.auth_schema import AuthSchema
-from schemas.register_schema import RegisterSchema
-import os
+from back.schemas.auth_schema import AuthSchema
+from back.schemas.register_schema import RegisterSchema
 from test_utils.env_reader import EnvReader
 
 class UserFactory:

@@ -9,7 +9,7 @@ from db_table_models.activation_code import ActivationCode
 from schemas.register_schema import RegisterSchema
 from schemas.activate_schema import ActivateSchema
 from schemas.auth_schema import AuthSchema
-from utils import validate_email, validate_password, generate_code, activation_storage
+from utils import validate_email, validate_password, generate_code
 from auth import hash_password, verify_password, create_access_token, create_refresh_token
 
 router = APIRouter(prefix="/user", tags=["User"])
