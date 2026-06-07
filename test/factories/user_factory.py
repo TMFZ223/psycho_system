@@ -91,3 +91,7 @@ class UserFactory:
     @staticmethod
     def login_with_admin():
         return AuthSchema(email=EnvReader.get_env_variable_value("admin_email"), password=EnvReader.get_env_variable_value("admin_password"))
+
+    @staticmethod
+    def login_with_empty_password():
+        return AuthSchema(email=EnvReader.get_env_variable_value("admin_email"), password="")

@@ -102,7 +102,7 @@ export default function LoginPage() {
 
                 {/* Ошибка авторизации */}
                 {authError && (
-                    <div className="mb-4 rounded-lg bg-red-100 border border-red-400 p-3 text-red-700">
+                    <div id="auth-error" className="mb-4 rounded-lg bg-red-100 border border-red-400 p-3 text-red-700">
                         {authError}
                     </div>
                 )}
@@ -146,9 +146,9 @@ export default function LoginPage() {
                     />
 
                     {emailError && (
-                        <p className="mt-1 text-sm text-red-500">
+                        <div className="mt-1 text-sm text-red-500">
                             {emailError}
-                        </p>
+                        </div>
                     )}
                 </div>
 
@@ -186,9 +186,9 @@ export default function LoginPage() {
                     />
 
                     {passwordError && (
-                        <p className="mt-1 text-sm text-red-500">
+                        <div id="auth-pass-error" className="mt-1 text-sm text-red-500">
                             {passwordError}
-                        </p>
+                        </div>
                     )}
                 </div>
 

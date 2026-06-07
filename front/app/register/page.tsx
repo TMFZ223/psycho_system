@@ -185,7 +185,7 @@ export default function RegisterPage() {
                     </label>
 
                     <input
-                        id="email"
+                        id="reg-email"
                         type="text"
 
                         value={email}
@@ -208,9 +208,9 @@ export default function RegisterPage() {
                     />
 
                     {emailError && (
-                        <p className="text-red-500 text-sm mt-1">
+                        <div id="email_error" className="text-red-500 text-sm mt-1">
                             {emailError}
-                        </p>
+                        </div>
                     )}
                 </div>
 
@@ -223,7 +223,7 @@ export default function RegisterPage() {
                     </label>
 
                     <input
-                        id="pass"
+                        id="user-pass"
                         type="password"
 
                         value={password}
@@ -246,9 +246,9 @@ export default function RegisterPage() {
                     />
 
                     {passwordError && (
-                        <p className="text-red-500 text-sm mt-1">
+                        <div id="password_error" className="text-red-500 text-sm mt-1">
                             {passwordError}
-                        </p>
+                        </div>
                     )}
                 </div>
 
@@ -286,9 +286,9 @@ export default function RegisterPage() {
                     />
 
                     {verifyPasswordError && (
-                        <p className="text-red-500 text-sm mt-1">
+                        <div id="verify_password_error" className="text-red-500 text-sm mt-1">
                             {verifyPasswordError}
-                        </p>
+                        </div>
                     )}
                 </div>
 
@@ -311,9 +311,9 @@ export default function RegisterPage() {
 
                 <div className="text-center">
 
-                    <p className="mb-3 text-gray-600">
+                    <div className="mb-3 text-gray-600">
                         Уже есть учётная запись?
-                    </p>
+                    </div>
 
                     <button
                         id="go_to_login_page"
