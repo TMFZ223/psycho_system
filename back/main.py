@@ -1,12 +1,13 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-import asyncio
 from database import engine
 from db_table_models.user import Base 
 from db_table_models.question import Base 
 from db_table_models.answer  import Base 
 from db_table_models.user_answer import Base
 from db_table_models.attempt import Base
+
 from routers import user, questions
 
 app = FastAPI()
@@ -17,6 +18,15 @@ async def create_tables():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 # Подключаем роутеры
 app.include_router(user.router)
 app.include_router(questions.router)

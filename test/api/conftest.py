@@ -3,9 +3,8 @@ import httpx
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-from main import app
-from routers.user import get_db
-from database import Base
+from back.main import app
+from back.routers.user import get_db
 from test_utils.env_reader import EnvReader
 
 TEST_DATABASE_URL = (

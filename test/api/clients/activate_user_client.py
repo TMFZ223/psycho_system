@@ -1,7 +1,7 @@
 import allure
 
 from clients.base_client import BaseClient
-from schemas.activate_schema import ActivateSchema
+from back.schemas.activate_schema import ActivateSchema
 
 class ActivateUserClient(BaseClient):
 

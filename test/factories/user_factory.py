@@ -1,6 +1,5 @@
-from schemas.auth_schema import AuthSchema
-from schemas.register_schema import RegisterSchema
-import os
+from back.schemas.auth_schema import AuthSchema
+from back.schemas.register_schema import RegisterSchema
 from test_utils.env_reader import EnvReader
 
 class UserFactory:
@@ -92,3 +91,7 @@ class UserFactory:
     @staticmethod
     def login_with_admin():
         return AuthSchema(email=EnvReader.get_env_variable_value("admin_email"), password=EnvReader.get_env_variable_value("admin_password"))
+
+    @staticmethod
+    def login_with_empty_password():
+        return AuthSchema(email=EnvReader.get_env_variable_value("admin_email"), password="")

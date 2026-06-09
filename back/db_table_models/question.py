@@ -1,6 +1,5 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey, ForeignKeyConstraint, UniqueConstraint, DateTime
+from sqlalchemy import Column, Integer, Text
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
 from database import Base
 
 class Question(Base):

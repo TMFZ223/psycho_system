@@ -1,7 +1,7 @@
 import allure
 from sqlalchemy import select, delete
-from db_table_models.activation_code import ActivationCode
-from db_table_models.user import User
+from back.db_table_models.activation_code import ActivationCode
+from back.db_table_models.user import User
 
 @allure.step("Удалить пользователя с ролью {role}")
 async def delete_users_by_role(db, role: str = "user"):

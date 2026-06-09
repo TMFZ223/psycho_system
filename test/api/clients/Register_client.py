@@ -1,7 +1,7 @@
 import allure
 
 from clients.base_client import BaseClient
-from schemas.register_schema import RegisterSchema
+from back.schemas.register_schema import RegisterSchema
 
 
 class RegisterClient(BaseClient):
